@@ -1,4 +1,4 @@
-<script>
+//
 // Global state
 let state = {
     sessionId: null,
@@ -206,4 +206,3 @@ inputText.addEventListener('keydown', (e) => {
         generatePosts();
     }
 });
-</script>

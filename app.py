@@ -6,7 +6,6 @@ from datetime import datetime
 from config import config
 from services.llm_services import LLMService
 from utils.validators import validate_input, sanitize_input
-from groq import Groq
 
 app = Flask(__name__)
 app.config.from_object(config[os.getenv('FLASK_ENV', 'development')])   
@@ -20,7 +19,6 @@ if not api_key:
     raise ValueError(f"API key for {llm_provider} not found in environment variables")
 
 llm_service = LLMService(api_key=api_key, provider=llm_provider)
-self.client = Groq(api_key=api_key)
 
 # In-memory session storage (use Redis in production)
 sessions = {}

@@ -7,7 +7,6 @@ class LLMService:
     def __init__(self, api_key, provider='groq'):
         self.provider = provider
         if provider == 'groq':
-            # Use environment variable or pass api_key directly as per latest SDK
             self.client = Groq(api_key=api_key)
             self.model = 'llama-3.3-70b-versatile'
         else :

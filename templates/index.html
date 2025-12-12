@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Post Generator - AI-Powered</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    <div>
+                        <h1>Reddit Post Generator</h1>
+                        <p>AI-powered post creation in 3 steps</p>
+                    </div>
+                </div>
+                <div class="steps">
+                    <span class="step active" id="step-1">1</span>
+                    <span class="step-arrow">→</span>
+                    <span class="step" id="step-2">2</span>
+                    <span class="step-arrow">→</span>
+                    <span class="step" id="step-3">3</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Step 1: Input -->
+            <div id="screen-1" class="screen active">
+                <h2>Step 1: Enter Your Idea</h2>
+                <p class="subtitle">Describe your Reddit post idea or paste a sample post</p>
+                <div class="form-group">
+                    <label for="input-text">Post Idea or Sample</label>
+                    <textarea 
+                        id="input-text" 
+                        rows="8" 
+                        placeholder="Example: I want to share my experience building a side project that made $10k in the first month..."></textarea>
+                </div>
+                <button id="generate-btn" class="btn btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    </svg>
+                    Generate 5 Posts
+                </button>
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Generating amazing posts...</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Selection -->
+            <div id="screen-2" class="screen">
+                <h2>Step 2: Select Your Favorite</h2>
+                <p class="subtitle">Choose the post that resonates with you most</p>
+                <div id="posts-container" class="posts-grid"></div>
+            </div>
+
+            <!-- Step 3: Feedback -->
+            <div id="screen-3" class="screen">
+                <h2>Step 3: Refine or Finish</h2>
+                <p class="subtitle">Provide feedback to regenerate or finish</p>
+                <div class="selected-post" id="selected-post-display"></div>
+                <div class="form-group">
+                    <label for="feedback-text">Feedback (Optional)</label>
+                    <textarea 
+                        id="feedback-text" 
+                        rows="4" 
+                        placeholder="Example: Make it more casual, add a question at the end, shorten the intro..."></textarea>
+                </div>
+                <div class="button-group">
+                    <button id="regenerate-btn" class="btn btn-secondary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 4v6h6M23 20v-6h-6"/>
+                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                        </svg>
+                        Regenerate 5 New Posts
+                    </button>
+                    <button id="finish-btn" class="btn btn-success">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Finish & Copy Post
+                    </button>
+                </div>
+                <button id="reset-btn" class="btn btn-reset">Start Over</button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Session ID: <span id="session-id">-</span> | Iterations: <span id="iteration-count">0</span></p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+
+<!-- ============================================================================ -->
+<!-- FILE: static/css/style.css -->
+<!-- ============================================================================ -->
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    padding: 24px;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    stroke-width: 2;
+}
+
+.logo h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.logo p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.step.active {
+    background: white;
+    color: #ff6b35;
+}
+
+.step-arrow {
+    font-size: 18px;
+}
+
+.main-content {
+    background: white;
+    padding: 32px;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: 500px;
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #ff6b35;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+.btn-primary {
+    background: #ff6b35;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #e65a2b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.btn-secondary {
+    background: #ff6b35;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #e65a2b;
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-reset {
+    background: #e5e7eb;
+    color: #374151;
+    margin-top: 16px;
+}
+
+.btn-reset:hover {
+    background: #d1d5db;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    padding: 24px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ff6b35;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.posts-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.post-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.post-card:hover {
+    border-color: #ff6b35;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.post-card h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.post-card p {
+    color: #666;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.post-badge {
+    display: inline-block;
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.selected-post {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.selected-post h3 {
+    font-size: 20px;
+    color: #111827;
+    margin-bottom: 12px;
+}
+
+.selected-post p {
+    color: #4b5563;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 16px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .button-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .main-content {
+        padding: 20px;
+    }
+}
+</style>
